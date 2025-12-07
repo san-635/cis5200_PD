@@ -2,7 +2,6 @@
 
 import os
 import torch
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, roc_auc_score, f1_score
