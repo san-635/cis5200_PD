@@ -160,7 +160,7 @@ class JointAttnModel(nn.Module):
             backbone.layer3,
             backbone.layer4,
         )
-
+        # channels is 512 for ResNet-18/34, 2048 for ResNet-50
         return feat_extractor, channels
 
     def _perform_attn(self, feat_map, proj_layer, attn_head):
