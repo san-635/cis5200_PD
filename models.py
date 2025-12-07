@@ -121,14 +121,9 @@ class JointAttnModel(nn.Module):
         self.mri_enc = mri_enc
         self.attn_dim = attn_dim
 
-        assert self.datscan_enc.enc_backbone in ["resnet18", "resnet34"], \
-            f"JointAttnModel only supports resnet18/resnet34 for DaTSCAN, got {self.datscan_enc.enc_backbone}"
-        assert self.mri_enc.enc_backbone in ["resnet18", "resnet34"], \
-            f"JointAttnModel only supports resnet18/resnet34 for MRI, got {self.mri_enc.enc_backbone}"
-
         # feature extractors
-        self.ds_feat_extractor, ds_channels = self._build_feat_extr(self.datscan_enc.model)
-        self.mri_feat_extractor, mri_channels = self._build_feat_extr(self.mri_enc.model)
+        self.ds_feat_extractor, ds_channels = self._build_feat_extr(self.datscan_enc.model, self.datscan_enc.feats_dim)
+        self.mri_feat_extractor, mri_channels = self._build_feat_extr(self.mri_enc.model, self.mri_enc.feats_dim)
 
         # projection layers to attn_dim
         self.ds_proj = nn.Conv2d(ds_channels, attn_dim, kernel_size=1)
@@ -153,7 +148,7 @@ class JointAttnModel(nn.Module):
             for p in self.mri_feat_extractor.parameters():
                 p.requires_grad = False
 
-    def _build_feat_extr(self, backbone):
+    def _build_feat_extr(self, backbone, channels):
         """ Returns feature extractor (backbone up to layer4) and number of output channels """
         feat_extractor = nn.Sequential(
             backbone.conv1,
@@ -166,7 +161,6 @@ class JointAttnModel(nn.Module):
             backbone.layer4,
         )
 
-        channels = 512
         return feat_extractor, channels
 
     def _perform_attn(self, feat_map, proj_layer, attn_head):
